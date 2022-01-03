@@ -53,7 +53,7 @@ func onReady() {
 		mQuit := systray.AddMenuItem("退出", "Quit the whole app")
 
 		// Sets the icon of a menu item. Only available on Mac.
-		mQuit.SetIcon(icon.Data)
+		mQuit.SetIconWithSize(icon.Data, 128, 128)
 
 		systray.AddSeparator()
 		mToggle := systray.AddMenuItem("Toggle", "Toggle the Quit button")

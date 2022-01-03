@@ -15,3 +15,6 @@ void add_separator(int menuId);
 void hide_menu_item(int menuId);
 void show_menu_item(int menuId);
 void quit();
+
+void remove_menu_item(int menuId);
+void setMenuItemIconWithSize(const char* iconBytes, int length, int menuId, bool template, int imgLength, int imgWidth);

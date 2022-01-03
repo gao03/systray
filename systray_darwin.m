@@ -203,6 +203,14 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
   }
 }
 
+- (void) remove_menu_item:(NSNumber*) menuId
+{
+  NSMenuItem* menuItem = find_menu_item(menu, menuId);
+  if (menuItem != NULL) {
+    [menu removeItem:menuItem];
+  }
+}
+
 - (void) quit
 {
   [NSApp terminate:self];
@@ -244,9 +252,13 @@ void setIcon(const char* iconBytes, int length, bool template) {
 }
 
 void setMenuItemIcon(const char* iconBytes, int length, int menuId, bool template) {
+    setMenuItemIconWithSize(iconBytes, length, menuId, template, 16, 16);
+}
+
+void setMenuItemIconWithSize(const char* iconBytes, int length, int menuId, bool template, int imgLength, int imgWidth) {
   NSData* buffer = [NSData dataWithBytes: iconBytes length:length];
   NSImage *image = [[NSImage alloc] initWithData:buffer];
-  [image setSize:NSMakeSize(16, 16)];
+  [image setSize:NSMakeSize(imgLength, imgWidth)];
   image.template = template;
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(setMenuItemIcon:), @[image, (id)mId]);
@@ -286,6 +298,11 @@ void hide_menu_item(int menuId) {
 void show_menu_item(int menuId) {
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(show_menu_item:), (id)mId);
+}
+
+void remove_menu_item(int menuId) {
+  NSNumber *mId = [NSNumber numberWithInt:menuId];
+  runInMainThread(@selector(remove_menu_item:), (id)mId);
 }
 
 void quit() {

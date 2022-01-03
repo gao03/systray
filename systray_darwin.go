@@ -36,3 +36,14 @@ func (item *MenuItem) SetTemplateIcon(templateIconBytes []byte, regularIconBytes
 	cstr := (*C.char)(unsafe.Pointer(&templateIconBytes[0]))
 	C.setMenuItemIcon(cstr, (C.int)(len(templateIconBytes)), C.int(item.id), true)
 }
+
+func RemoveMenuItem(menu *MenuItem) {
+	C.remove_menu_item(
+		C.int(menu.id),
+	)
+}
+
+func (item *MenuItem) SetIconWithSize(iconBytes []byte, imgLength uint32, imgWidth uint32) {
+	cstr := (*C.char)(unsafe.Pointer(&iconBytes[0]))
+	C.setMenuItemIconWithSize(cstr, (C.int)(len(iconBytes)), C.int(item.id), false, C.int(imgLength), C.int(imgWidth))
+}
