@@ -255,10 +255,10 @@ void setMenuItemIcon(const char* iconBytes, int length, int menuId, bool templat
     setMenuItemIconWithSize(iconBytes, length, menuId, template, 16, 16);
 }
 
-void setMenuItemIconWithSize(const char* iconBytes, int length, int menuId, bool template, int imgLength, int imgWidth) {
+void setMenuItemIconWithSize(const char* iconBytes, int length, int menuId, bool template, int width, int height) {
   NSData* buffer = [NSData dataWithBytes: iconBytes length:length];
   NSImage *image = [[NSImage alloc] initWithData:buffer];
-  [image setSize:NSMakeSize(imgLength, imgWidth)];
+  [image setSize:NSMakeSize(width, height)];
   image.template = template;
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(setMenuItemIcon:), @[image, (id)mId]);

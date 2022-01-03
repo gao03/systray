@@ -43,7 +43,7 @@ func RemoveMenuItem(menu *MenuItem) {
 	)
 }
 
-func (item *MenuItem) SetIconWithSize(iconBytes []byte, imgLength uint32, imgWidth uint32) {
+func (item *MenuItem) SetIconWithSize(iconBytes []byte, width, height uint32) {
 	cstr := (*C.char)(unsafe.Pointer(&iconBytes[0]))
-	C.setMenuItemIconWithSize(cstr, (C.int)(len(iconBytes)), C.int(item.id), false, C.int(imgLength), C.int(imgWidth))
+	C.setMenuItemIconWithSize(cstr, (C.int)(len(iconBytes)), C.int(item.id), false, C.int(width), C.int(height))
 }
