@@ -1,3 +1,10 @@
+## 修改点
+只在 MacOS 下进行了测试，其他系统暂时不支持
+1. 增加 RemoveMenuItem 方法，用来移除菜单项
+2. 增加 SetIconWithSize 方法，用来设置不同大小的 icon
+
+---
+
 systray is a cross-platform Go library to place an icon and menu in the notification area.
 
 ## Features

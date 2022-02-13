@@ -42,7 +42,7 @@ func onReady() {
 		// Sets the icon of a menu item. Only available on Mac.
 		mEnabled.SetTemplateIcon(icon.Data, icon.Data)
 
-		systray.AddMenuItem("Ignored", "Ignored")
+		ignoreButton := systray.AddMenuItem("Ignored", "Ignored")
 
 		subMenuTop := systray.AddMenuItem("SubMenuTop", "SubMenu Test (top)")
 		subMenuMiddle := subMenuTop.AddSubMenuItem("SubMenuMiddle", "SubMenu Test (middle)")
@@ -101,6 +101,9 @@ func onReady() {
 				systray.Quit()
 				fmt.Println("Quit2 now...")
 				return
+			case <- ignoreButton.ClickedCh:
+				fmt.Println("ignoreButton")
+				systray.RemoveMenuItem(ignoreButton)
 			}
 		}
 	}()
