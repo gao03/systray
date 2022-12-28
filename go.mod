@@ -11,4 +11,4 @@ require (
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
 )
 
-replace github.com/getlantern/systray v1.1.0 => github.com/gao03/systray v1.1.1-0.20220103134528-850a2df57e0c
+replace github.com/getlantern/systray v1.2.0 => github.com/gao03/systray v1.2.1-0.20221228034426-b63b5c241015
