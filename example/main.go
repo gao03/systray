@@ -24,6 +24,11 @@ func onReady() {
 	systray.SetTitle("Awesome App")
 	systray.SetTooltip("Lantern")
 	mQuitOrig := systray.AddMenuItem("Quit", "Quit the whole app")
+
+	systray.AddRightMenuItem("right Menu", "right tooltip")
+	systray.AddRightSeparator()
+	rightMenu := systray.AddRightMenuItem("right Menu2", "right tooltip")
+
 	go func() {
 		<-mQuitOrig.ClickedCh
 		fmt.Println("Requesting quit")
@@ -101,9 +106,11 @@ func onReady() {
 				systray.Quit()
 				fmt.Println("Quit2 now...")
 				return
-			case <- ignoreButton.ClickedCh:
+			case <-ignoreButton.ClickedCh:
 				fmt.Println("ignoreButton")
 				systray.RemoveMenuItem(ignoreButton)
+			case <-rightMenu.ClickedCh:
+				systray.RemoveMenuItem(rightMenu)
 			}
 		}
 	}()

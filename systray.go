@@ -48,6 +48,8 @@ type MenuItem struct {
 	isCheckable bool
 	// parent item, for sub menus
 	parent *MenuItem
+	// is right click menu
+	isRight bool
 }
 
 func (item *MenuItem) String() string {
@@ -68,6 +70,7 @@ func newMenuItem(title string, tooltip string, parent *MenuItem) *MenuItem {
 		checked:     false,
 		isCheckable: false,
 		parent:      parent,
+		isRight:     false,
 	}
 }
 
@@ -120,6 +123,13 @@ func AddMenuItem(title string, tooltip string) *MenuItem {
 	return item
 }
 
+func AddRightMenuItem(title string, tooltip string) *MenuItem {
+	item := newMenuItem(title, tooltip, nil)
+	item.isRight = true
+	item.update()
+	return item
+}
+
 // AddMenuItemCheckbox adds a menu item with the designated title and tooltip and a checkbox for Linux.
 // It can be safely invoked from different goroutines.
 // On Windows and OSX this is the same as calling AddMenuItem
@@ -134,6 +144,10 @@ func AddMenuItemCheckbox(title string, tooltip string, checked bool) *MenuItem {
 // AddSeparator adds a separator bar to the menu
 func AddSeparator() {
 	addSeparator(atomic.AddUint32(&currentID, 1))
+}
+
+func AddRightSeparator() {
+	addRightSeparator(atomic.AddUint32(&currentID, 1))
 }
 
 // AddSubMenuItem adds a nested sub-menu item with the designated title and tooltip.

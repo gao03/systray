@@ -1,4 +1,6 @@
+//go:build !windows
 // +build !windows
+
 // go:build !windows
 
 package systray
@@ -7,6 +9,7 @@ package systray
 import "C"
 
 import (
+	"runtime"
 	"unsafe"
 )
 
@@ -58,6 +61,18 @@ func addOrUpdateMenuItem(item *MenuItem) {
 	if item.parent != nil {
 		parentID = item.parent.id
 	}
+	if item.isRight && runtime.GOOS == "darwin" {
+		C.add_or_update_right_menu_item(
+			C.int(item.id),
+			C.int(parentID),
+			C.CString(item.title),
+			C.CString(item.tooltip),
+			disabled,
+			checked,
+			isCheckable,
+		)
+		return
+	}
 	C.add_or_update_menu_item(
 		C.int(item.id),
 		C.int(parentID),
@@ -71,6 +86,9 @@ func addOrUpdateMenuItem(item *MenuItem) {
 
 func addSeparator(id uint32) {
 	C.add_separator(C.int(id))
+}
+func addRightSeparator(id uint32) {
+	C.add_right_separator(C.int(id))
 }
 
 func hideMenuItem(item *MenuItem) {

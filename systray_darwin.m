@@ -15,20 +15,22 @@
 
 @interface MenuItem : NSObject
 {
-  @public
+@public
     NSNumber* menuId;
     NSNumber* parentMenuId;
     NSString* title;
     NSString* tooltip;
     short disabled;
     short checked;
+    short isRight;
 }
 -(id) initWithId: (int)theMenuId
 withParentMenuId: (int)theParentMenuId
        withTitle: (const char*)theTitle
      withTooltip: (const char*)theTooltip
     withDisabled: (short)theDisabled
-     withChecked: (short)theChecked;
+     withChecked: (short)theChecked
+     withRight: (short) theRight;
      @end
      @implementation MenuItem
      -(id) initWithId: (int)theMenuId
@@ -37,6 +39,7 @@ withParentMenuId: (int)theParentMenuId
           withTooltip: (const char*)theTooltip
          withDisabled: (short)theDisabled
           withChecked: (short)theChecked
+          withRight: (short)theRight
 {
   menuId = [NSNumber numberWithInt:theMenuId];
   parentMenuId = [NSNumber numberWithInt:theParentMenuId];
@@ -46,6 +49,7 @@ withParentMenuId: (int)theParentMenuId
                                      encoding:NSUTF8StringEncoding];
   disabled = theDisabled;
   checked = theChecked;
+  isRight = theRight;
   return self;
 }
 @end
@@ -59,7 +63,8 @@ withParentMenuId: (int)theParentMenuId
   @implementation AppDelegate
 {
   NSStatusItem *statusItem;
-  NSMenu *menu;
+  NSMenu *leftMenu;
+  NSMenu *rightMenu;
   NSCondition* cond;
 }
 
@@ -68,10 +73,23 @@ withParentMenuId: (int)theParentMenuId
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification
 {
   self->statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
-  self->menu = [[NSMenu alloc] init];
-  [self->menu setAutoenablesItems: FALSE];
-  [self->statusItem setMenu:self->menu];
+  [self->statusItem.button setAction:@selector(handleStatusItemActions:)];
+  [self->statusItem.button sendActionOn:NSEventMaskLeftMouseUp|NSEventMaskRightMouseUp];
+
+  self->leftMenu = [[NSMenu alloc] init];
+  [self->leftMenu setAutoenablesItems: FALSE];
+  self->rightMenu = [[NSMenu alloc] init];
+  [self->rightMenu setAutoenablesItems: FALSE];
+
   systray_ready();
+}
+
+-(void)handleStatusItemActions:(id)sender{
+    NSEvent *event = [NSApp currentEvent];
+    NSMenu *menu = event.type == NSEventTypeLeftMouseUp ? self->leftMenu : self->rightMenu;
+    [self->statusItem setMenu:menu];
+    [self->statusItem.button performClick:nil];
+    [self->statusItem setMenu:nil];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification
@@ -113,10 +131,10 @@ withParentMenuId: (int)theParentMenuId
 }
 
 - (void)add_or_update_menu_item:(MenuItem *)item {
-  NSMenu *theMenu = self->menu;
+  NSMenu *theMenu = item->isRight == 1 ? self->rightMenu : self->leftMenu;
   NSMenuItem *parentItem;
   if ([item->parentMenuId integerValue] > 0) {
-    parentItem = find_menu_item(menu, item->parentMenuId);
+    parentItem = find_menu_item(leftMenu, item->parentMenuId);
     if (parentItem.hasSubmenu) {
       theMenu = parentItem.submenu;
     } else {
@@ -170,14 +188,27 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
   return NULL;
 };
 
+NSMenuItem * find_menu_items(NSMenu *menu1, NSMenu *menu2, NSNumber *menuId)
+{
+    NSMenuItem *foundItem = find_menu_item(menu1, menuId);
+    if (foundItem == nil) {
+        foundItem = find_menu_item(menu2, menuId);
+    }
+    return foundItem;
+}
+
 - (void) add_separator:(NSNumber*) menuId
 {
-  [menu addItem: [NSMenuItem separatorItem]];
+  [leftMenu addItem: [NSMenuItem separatorItem]];
+}
+- (void) add_right_separator:(NSNumber*) menuId
+{
+  [rightMenu addItem: [NSMenuItem separatorItem]];
 }
 
 - (void) hide_menu_item:(NSNumber*) menuId
 {
-  NSMenuItem* menuItem = find_menu_item(menu, menuId);
+  NSMenuItem* menuItem = find_menu_items(leftMenu, rightMenu, menuId);
   if (menuItem != NULL) {
     [menuItem setHidden:TRUE];
   }
@@ -188,7 +219,7 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
   NSNumber* menuId = [imageAndMenuId objectAtIndex:1];
 
   NSMenuItem* menuItem;
-  menuItem = find_menu_item(menu, menuId);
+  menuItem = find_menu_items(leftMenu, rightMenu, menuId);
   if (menuItem == NULL) {
     return;
   }
@@ -197,7 +228,7 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
 
 - (void) show_menu_item:(NSNumber*) menuId
 {
-  NSMenuItem* menuItem = find_menu_item(menu, menuId);
+  NSMenuItem* menuItem = find_menu_items(leftMenu, rightMenu, menuId);
   if (menuItem != NULL) {
     [menuItem setHidden:FALSE];
   }
@@ -205,9 +236,15 @@ NSMenuItem *find_menu_item(NSMenu *ourMenu, NSNumber *menuId) {
 
 - (void) remove_menu_item:(NSNumber*) menuId
 {
-  NSMenuItem* menuItem = find_menu_item(menu, menuId);
+  NSMenuItem* menuItem = find_menu_item(leftMenu, menuId);
   if (menuItem != NULL) {
-    [menu removeItem:menuItem];
+      [leftMenu removeItem:menuItem];
+      return;
+  }
+  menuItem = find_menu_item(rightMenu, menuId);
+  if (menuItem != NULL) {
+      [rightMenu removeItem:menuItem];
+      return;
   }
 }
 
@@ -279,7 +316,14 @@ void setTooltip(char* ctooltip) {
 }
 
 void add_or_update_menu_item(int menuId, int parentMenuId, char* title, char* tooltip, short disabled, short checked, short isCheckable) {
-  MenuItem* item = [[MenuItem alloc] initWithId: menuId withParentMenuId: parentMenuId withTitle: title withTooltip: tooltip withDisabled: disabled withChecked: checked];
+  MenuItem* item = [[MenuItem alloc] initWithId: menuId withParentMenuId: parentMenuId withTitle: title withTooltip: tooltip withDisabled: disabled withChecked: checked withRight:0];
+  free(title);
+  free(tooltip);
+  runInMainThread(@selector(add_or_update_menu_item:), (id)item);
+}
+
+void add_or_update_right_menu_item(int menuId, int parentMenuId, char* title, char* tooltip, short disabled, short checked, short isCheckable) {
+  MenuItem* item = [[MenuItem alloc] initWithId: menuId withParentMenuId: parentMenuId withTitle: title withTooltip: tooltip withDisabled: disabled withChecked: checked withRight:1];
   free(title);
   free(tooltip);
   runInMainThread(@selector(add_or_update_menu_item:), (id)item);
@@ -288,6 +332,10 @@ void add_or_update_menu_item(int menuId, int parentMenuId, char* title, char* to
 void add_separator(int menuId) {
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(add_separator:), (id)mId);
+}
+void add_right_separator(int menuId) {
+  NSNumber *mId = [NSNumber numberWithInt:menuId];
+  runInMainThread(@selector(add_right_separator:), (id)mId);
 }
 
 void hide_menu_item(int menuId) {
