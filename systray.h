@@ -20,3 +20,4 @@ void remove_menu_item(int menuId);
 void setMenuItemIconWithSize(const char* iconBytes, int length, int menuId, bool template, int width, int height);
 void add_or_update_right_menu_item(int menuId, int parentMenuId, char* title, char* tooltip, short disabled, short checked, short isCheckable);
 void add_right_separator(int menuId);
+void toggle_right_menu(int enable);

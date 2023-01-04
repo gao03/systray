@@ -81,6 +81,14 @@ func Run(onReady func(), onExit func()) {
 	nativeLoop()
 }
 
+func EnableRightMenu() {
+	enableRightMenu()
+}
+
+func DisableRightMenu() {
+	disableRightMenu()
+}
+
 // Register initializes GUI and registers the callbacks but relies on the
 // caller to run the event loop somewhere else. It's useful if the program
 // needs to show other UI elements, for example, webview.

@@ -47,3 +47,11 @@ func (item *MenuItem) SetIconWithSize(iconBytes []byte, width, height uint32) {
 	cstr := (*C.char)(unsafe.Pointer(&iconBytes[0]))
 	C.setMenuItemIconWithSize(cstr, (C.int)(len(iconBytes)), C.int(item.id), false, C.int(width), C.int(height))
 }
+
+func enableRightMenu() {
+	C.toggle_right_menu(C.int(1))
+}
+
+func disableRightMenu() {
+	C.toggle_right_menu(C.int(0))
+}

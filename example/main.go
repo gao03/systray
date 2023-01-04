@@ -28,7 +28,7 @@ func onReady() {
 	systray.AddRightMenuItem("right Menu", "right tooltip")
 	systray.AddRightSeparator()
 	rightMenu := systray.AddRightMenuItem("right Menu2", "right tooltip")
-
+	enableRightMenu := systray.AddMenuItem("enable right menu", "")
 	go func() {
 		<-mQuitOrig.ClickedCh
 		fmt.Println("Requesting quit")
@@ -109,6 +109,8 @@ func onReady() {
 			case <-ignoreButton.ClickedCh:
 				fmt.Println("ignoreButton")
 				systray.RemoveMenuItem(ignoreButton)
+			case <-enableRightMenu.ClickedCh:
+				systray.EnableRightMenu()
 			case <-rightMenu.ClickedCh:
 				systray.RemoveMenuItem(rightMenu)
 			}

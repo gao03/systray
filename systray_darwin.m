@@ -66,6 +66,7 @@ withParentMenuId: (int)theParentMenuId
   NSMenu *leftMenu;
   NSMenu *rightMenu;
   NSCondition* cond;
+  bool enableRightMenu;
 }
 
 @synthesize window = _window;
@@ -86,7 +87,7 @@ withParentMenuId: (int)theParentMenuId
 
 -(void)handleStatusItemActions:(id)sender{
     NSEvent *event = [NSApp currentEvent];
-    NSMenu *menu = event.type == NSEventTypeLeftMouseUp ? self->leftMenu : self->rightMenu;
+    NSMenu *menu = (self->enableRightMenu && event.type == NSEventMaskLeftMouseUp) ? self->rightMenu : self->leftMenu;
     [self->statusItem setMenu:menu];
     [self->statusItem.button performClick:nil];
     [self->statusItem setMenu:nil];
@@ -253,6 +254,16 @@ NSMenuItem * find_menu_items(NSMenu *menu1, NSMenu *menu2, NSNumber *menuId)
   [NSApp terminate:self];
 }
 
+- (void) enable_right_menu
+{
+    self->enableRightMenu = true;
+}
+
+- (void) disable_right_menu
+{
+    self->enableRightMenu = false;
+}
+
 @end
 
 void registerSystray(void) {
@@ -351,6 +362,14 @@ void show_menu_item(int menuId) {
 void remove_menu_item(int menuId) {
   NSNumber *mId = [NSNumber numberWithInt:menuId];
   runInMainThread(@selector(remove_menu_item:), (id)mId);
+}
+
+void toggle_right_menu(int enable) {
+    if (enable == 1) {
+        runInMainThread(@selector(enable_right_menu), nil);
+    } else {
+        runInMainThread(@selector(disable_right_menu), nil);
+    }
 }
 
 void quit() {
